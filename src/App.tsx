@@ -29,7 +29,7 @@ import {
 import confetti from 'canvas-confetti';
 
 // --- Constants & Types ---
-const LIFF_ID = "YOUR_LIFF_ID";
+const LIFF_ID = "2009192757-ZZX0pw1b";
 
 const MISSION_DETAILS = {
   date: "2026/03/08 (日)",

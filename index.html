@@ -2,69 +2,70 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>豐生茶館：吃貨報名挑戰</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>豐生茶館：吃貨大募集</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         :root { --main-color: #8B4513; --bg-color: #FDF5E6; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        #game-container { width: 100%; max-width: 400px; padding: 20px; text-align: center; box-sizing: border-box; }
-        .board { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; margin: 20px 0; background: #D2B48C; padding: 10px; border-radius: 15px; position: relative; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
-        .cell { aspect-ratio: 1; background: #FFF; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; position: relative; border-bottom: 4px solid #ccc; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow: hidden; touch-action: manipulation; }
+        #game-container { width: 100%; max-width: 400px; padding: 15px; text-align: center; box-sizing: border-box; }
+        #collection-zone { display: flex; justify-content: center; gap: 15px; margin-bottom: 10px; background: #fff; padding: 10px; border-radius: 20px; border: 2px solid #D2B48C; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .food-slot { font-size: 24px; filter: grayscale(100%); opacity: 0.3; transition: all 0.5s; }
+        .food-slot.active { filter: grayscale(0%); opacity: 1; transform: scale(1.3); }
+        .board { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 6px; margin: 15px 0; background: #D2B48C; padding: 10px; border-radius: 15px; position: relative; }
+        .cell { aspect-ratio: 1; background: #FFF; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; position: relative; border-bottom: 3px solid #ccc; line-height: 1.2; }
         .cell.event { background: #FFECB3; font-weight: bold; }
-        .center { grid-column: 2 / 4; grid-row: 2 / 4; background: #FFDAB9; font-weight: bold; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; border: 2px solid #E67E22; }
-        #player { width: 40px; height: 40px; border-radius: 50%; position: absolute; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.3); object-fit: cover; left: 0; top: 0; }
-        .btn { background: #E67E22; color: white; border: none; padding: 15px 35px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #D35400; transition: 0.1s; }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px #D35400; }
+        .center { grid-column: 2 / 4; grid-row: 2 / 4; background: #FFDAB9; font-weight: bold; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; border: 2px solid #E67E22; color: #8B4513; }
+        #player { width: 38px; height: 38px; border-radius: 50%; position: absolute; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 10; border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.3); object-fit: cover; }
+        .btn { background: #E67E22; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px #D35400; width: 80%; }
+        .btn:disabled { background: #ccc; box-shadow: none; transform: none; cursor: not-allowed; }
         #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; }
-        .modal { background: white; padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .ticket { border: 3px dashed #8B4513; padding: 20px; background: #FFF9E3; border-radius: 10px; }
-        .glass-heart { color: #e74c3c; font-size: 15px; font-weight: bold; margin: 15px 0; line-height: 1.6; background: #ffeaea; padding: 10px; border-radius: 10px; }
+        .modal { background: white; padding: 25px; border-radius: 20px; width: 80%; max-width: 300px; text-align: center; border: 4px solid #E67E22; position: relative; }
         .hidden { display: none !important; }
         .shake { animation: shake 0.5s; }
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 100% { transform: translate(0, 0) rotate(0); } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h2 style="color: #8B4513; margin-bottom: 5px;">🍱 吃貨大富翁</h2>
-    <div id="stat" style="margin-bottom: 10px;">
-        <span style="background: #fff; padding: 5px 10px; border-radius: 15px; border: 1px solid #ddd;">🍱 <span id="food-count">0</span> / 4</span>
-        <span style="background: #fff; padding: 5px 10px; border-radius: 15px; border: 1px solid #ddd;">🚩 第 <span id="lap-count">1</span> 圈</span>
+    <h2 style="color: #8B4513; margin-top: 0;">🍱 吃貨大富翁</h2>
+    <div id="collection-zone">
+        <div id="slot-🍱" class="food-slot">🍱</div>
+        <div id="slot-🧋" class="food-slot">🧋</div>
+        <div id="slot-🥟" class="food-slot">🥟</div>
+        <div id="slot-🍗" class="food-slot">🍗</div>
+        <div style="margin-left: 10px; font-weight: bold; color: #8B4513;">🚩 <span id="lap-count">1</span>/5</div>
     </div>
-    
     <div class="board" id="board">
         <img id="player" src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="player">
         <div class="center">豐生茶館<br><span style="font-size: 10px;">3/8 12:00</span></div>
     </div>
-
     <button class="btn" id="dice-btn">🎲 擲骰子</button>
-    <div id="msg" style="margin-top:20px; height: 3em; color: #8B4513; font-weight: bold; font-size: 15px; padding: 0 10px;">吧拉拉：快擲骰子開始冒險吧！</div>
+    <div id="msg" style="margin-top:15px; color: #8B4513; font-weight: bold; min-height: 1.5em;">吧拉拉：快開始吧！</div>
 </div>
 
 <div id="overlay">
-    <div class="modal" id="modal-content">
-        <h3 style="color: #E67E22;">📣 吧拉拉導播公告</h3>
-        <p>3/8 12:00 豐生茶館聚餐任務！<br>請在 5 圈內集齊 4 樣必吃美食才算報名成功喔！</p>
-        <p style="color:red; font-weight:bold;">⚠️ 需繳納 $100 訂金</p>
-        <button class="btn" id="start-btn">了解，開玩！</button>
-    </div>
+    <div class="modal" id="modal-content"></div>
 </div>
 
 <script>
     const liffId = "2009192757-ZZX0pw1b";
-    let currentPos = 0;
-    let foodCollected = new Set();
-    let laps = 1;
-    const boardSize = 12;
+    let currentPos = 0, foodCollected = new Set(), laps = 1, isMoving = false, boardSize = 12;
     
-    // 定義格子內容
     const boardConfig = [
-        { icon: "🏠", name: "起點" }, { icon: "❓", name: "命運", type: "event" }, { icon: "🍱", name: "飽到天靈蓋豪華便當" },
-        { icon: "❓", name: "機會", type: "event" }, { icon: "🏃", name: "快走" }, { icon: "🧋", name: "主辦方淚水珍奶" },
-        { icon: "🚧", name: "塞車", type: "event" }, { icon: "❓", name: "命運", type: "event" }, { icon: "🥟", name: "皮薄心軟噴汁餃" },
-        { icon: "🧧", name: "機會", type: "event" }, { icon: "🏃", name: "衝刺" }, { icon: "🍗", name: "主辦方碎碎念炸雞" }
+        { icon: "🏠", name: "起點", msg: "回到起點！吧拉拉：能量滿滿，準備再衝一圈！" }, 
+        { icon: "❓", name: "命運", type: "event" }, 
+        { icon: "🍱", name: "飽到天靈蓋<br>豪華便當", msg: "吧拉拉：這份量...主辦方是想把大家都餵成胖子吧！" },
+        { icon: "❓", name: "機會", type: "event" }, 
+        { icon: "🏃", name: "快步", msg: "吧拉拉：別走那麼快，我的短腿快跟不上啦！" }, 
+        { icon: "🧋", name: "主辦方<br>淚水珍奶", msg: "吧拉拉：這珍珠大顆又圓潤，跟主辦方的眼淚一模一樣。💔" },
+        { icon: "🚧", name: "塞車", type: "event" }, 
+        { icon: "❓", name: "命運", type: "event" }, 
+        { icon: "🥟", name: "皮薄心軟<br>噴汁餃", msg: "吧拉拉：小心噴汁！這餃子跟主辦方的心一樣軟。💸" },
+        { icon: "🧧", name: "機會", type: "event" }, 
+        { icon: "🏃", name: "衝刺", msg: "吧拉拉：衝啊！為了 3/8 的豪華大餐，這點路不算什麼！" }, 
+        { icon: "🍗", name: "主辦方<br>碎碎念炸雞", msg: "吧拉拉：每一口炸雞都帶著主辦方的提醒：記得交訂金！" }
     ];
 
     window.onload = function() {
@@ -73,112 +74,125 @@
             let div = document.createElement('div');
             div.className = config.type === "event" ? 'cell event' : 'cell';
             div.id = 'cell-' + i;
-            div.innerHTML = `<span style="font-size:20px">${config.icon}</span><span style="font-size:10px">${config.name}</span>`;
+            div.innerHTML = `<span style="font-size:18px">${config.icon}</span><span style="font-size:9px">${config.name}</span>`;
             boardNode.appendChild(div);
         });
-        
-        document.getElementById('start-btn').onclick = () => document.getElementById('overlay').classList.add('hidden');
         document.getElementById('dice-btn').onclick = rollDice;
-
         liff.init({ liffId }).then(() => {
             if (!liff.isLoggedIn()) liff.login();
             liff.getProfile().then(p => { document.getElementById('player').src = p.pictureUrl; });
         });
+        popModal(`<h3>📢 吧拉拉導播公告</h3><p>3/8 12:00 豐生茶館聚餐任務！<br>集齊 4 樣美食或繞完 5 圈才算報名成功！</p><p style="color:red; font-weight:bold;">⚠️ 每人需交 $100 訂金</p><button class="btn" onclick="closeModal()">了解，開玩！</button>`);
         setTimeout(updatePlayerPos, 500);
     };
+
+    function popModal(html) {
+        document.getElementById('modal-content').innerHTML = html;
+        document.getElementById('overlay').classList.remove('hidden');
+    }
+
+    function closeModal() { document.getElementById('overlay').classList.add('hidden'); }
 
     function updatePlayerPos() {
         const cell = document.getElementById('cell-' + currentPos);
         const player = document.getElementById('player');
-        player.style.left = cell.offsetLeft + (cell.offsetWidth/2 - 20) + 'px';
-        player.style.top = cell.offsetTop + (cell.offsetHeight/2 - 20) + 'px';
+        player.style.left = cell.offsetLeft + (cell.offsetWidth/2 - 19) + 'px';
+        player.style.top = cell.offsetTop + (cell.offsetHeight/2 - 19) + 'px';
     }
 
-    function rollDice() {
-        if (navigator.vibrate) navigator.vibrate(50);
+    async function rollDice() {
+        if (isMoving) return;
+        isMoving = true;
+        document.getElementById('dice-btn').disabled = true;
         const dice = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('msg').innerText = `🎲 你擲出了 ${dice} 點！`;
-        movePlayer(dice);
+        document.getElementById('msg').innerText = `🎲 擲出了 ${dice} 點！`;
+        for (let i = 0; i < dice; i++) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+            currentPos = (currentPos + 1) % boardSize;
+            if (currentPos === 0) { laps++; document.getElementById('lap-count').innerText = laps; }
+            updatePlayerPos();
+        }
+        setTimeout(() => { handleLanding(); isMoving = false; document.getElementById('dice-btn').disabled = false; }, 300);
     }
 
-    function movePlayer(step) {
-        let target = currentPos + step;
-        if (target >= boardSize) {
-            laps++;
-            document.getElementById('lap-count').innerText = laps;
-            say("吧拉拉：哇！又繞一圈了，離美食更近了！");
-        }
-        currentPos = target % boardSize;
-        updatePlayerPos();
-
-        setTimeout(() => {
-            const cell = boardConfig[currentPos];
-            if (["🍱", "🧋", "🥟", "🍗"].includes(cell.icon)) {
-                if (!foodCollected.has(cell.icon)) {
-                    foodCollected.add(cell.icon);
-                    document.getElementById('food-count').innerText = foodCollected.size;
-                    say(`吧拉拉：太棒了！獲得了 ${cell.icon}！`);
-                } else {
-                    say(`吧拉拉：這道 ${cell.icon} 你已經拿過囉～`);
-                }
-            } else if (cell.type === "event") {
-                triggerEvent();
+    function handleLanding() {
+        const cell = boardConfig[currentPos];
+        const foodIcons = ["🍱", "🧋", "🥟", "🍗"];
+        if (foodIcons.includes(cell.icon)) {
+            if (!foodCollected.has(cell.icon)) {
+                foodCollected.add(cell.icon);
+                document.getElementById(`slot-${cell.icon}`).classList.add('active');
             }
-
-            if (foodCollected.size >= 4 || laps > 5) {
-                setTimeout(showResult, 1000);
-            }
-        }, 500);
+            popModal(`<h3>😋 踩到美食！</h3><h1 style="font-size:50px; margin:10px 0;">${cell.icon}</h1><p><b>${cell.name.replace('<br>','')}</b></p><p>${cell.msg}</p><button class="btn" onclick="checkEnd()">收進口袋</button>`);
+        } 
+        else if (cell.type === "event") { triggerEvent(); }
+        else { popModal(`<h3>📍 到達 ${cell.name}</h3><p>${cell.msg}</p><button class="btn" onclick="checkEnd()">知道了</button>`); }
     }
 
     function triggerEvent() {
         const events = [
-            { m: "吧拉拉應援！前進 1 格", s: 1 },
-            { m: "梅川東路大塞車！退後 1 格", s: -1 },
-            { m: "手機大地震！(畫面劇烈抖動)", s: 0, v: true },
-            { m: "吧拉拉碎碎念：記得 2/25 前交訂金喔！", s: 0 }
+            { t: "吧拉拉助陣！", m: "吧拉拉在背後推了你一把，前進 1 格！", s: 1 },
+            { t: "路邊滑倒！", m: "地板太油了，狼狽地向後退 1 格...", s: -1 },
+            { t: "驚喜地震！", m: "吧拉拉：大家坐穩了，手機要大地震啦！", s: 0, v: true },
+            { t: "碎碎念攻擊！", m: "吧拉拉：記得 2/25 前要交訂金喔，不交我就去你家門口哭！💔", s: 0 },
+            { t: "吧拉拉推拿時間", m: "你走得太辛苦了，強制休息 5 秒放鬆一下...", s: 0, wait: 5 }
         ];
         const e = events[Math.floor(Math.random() * events.length)];
-        say(e.m);
         if (e.v) {
             document.body.classList.add('shake');
             if (navigator.vibrate) navigator.vibrate(400);
             setTimeout(() => document.body.classList.remove('shake'), 500);
         }
-        if (e.s !== 0) {
-            setTimeout(() => {
-                currentPos = (currentPos + e.s + boardSize) % boardSize;
-                updatePlayerPos();
-            }, 800);
+
+        if (e.wait) {
+            startWait(e.t, e.m, e.wait);
+        } else {
+            popModal(`<h3>${e.t}</h3><p>${e.m}</p><button class="btn" onclick="executeEvent(${e.s})">收到</button>`);
         }
     }
 
-    function say(txt) { document.getElementById('msg').innerText = txt; }
+    function startWait(title, msg, seconds) {
+        let timeLeft = seconds;
+        isMoving = true;
+        document.getElementById('dice-btn').disabled = true;
+        const updateWaitModal = () => {
+            popModal(`<h3>${title}</h3><p>${msg}</p><h2 id="timer" style="color:#E67E22; font-size:40px; margin:10px 0;">${timeLeft}</h2><p>吧拉拉：不准動喔！倒數結束才能走！</p>`);
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateWaitModal, 1000);
+            } else {
+                popModal(`<h3>休息結束！</h3><p>吧拉拉：推拿完舒服多了吧？繼續前進！</p><button class="btn" onclick="isMoving=false; document.getElementById('dice-btn').disabled=false; checkEnd();">出發！</button>`);
+            }
+        };
+        updateWaitModal();
+    }
+
+    async function executeEvent(s) {
+        closeModal();
+        if (s !== 0) {
+            await new Promise(r => setTimeout(r, 400));
+            currentPos = (currentPos + s + boardSize) % boardSize;
+            updatePlayerPos();
+            setTimeout(handleLanding, 400);
+        } else { checkEnd(); }
+    }
+
+    function checkEnd() {
+        closeModal();
+        if (foodCollected.size >= 4 || laps > 5) { setTimeout(showResult, 600); }
+    }
 
     function showResult() {
-        document.getElementById('overlay').classList.remove('hidden');
-        document.getElementById('modal-content').innerHTML = `
-            <div class="ticket">
-                <h3 style="margin-top:0;">🎫 豐生茶館 入座憑證</h3>
-                <p>時間：3/8 (日) 12:00</p>
-                <div class="glass-heart">
-                    為了防止有人放鴿子，請依人數繳納訂金。不然主辦方會玻璃心碎掉，明天都不能上班了...💔
-                </div>
-                <p style="font-weight:bold; color:#D35400;">💰 訂金：$100 / 人<br><span style="font-size:12px">(2/25 截止，現場可抵消費)</span></p>
-                <button class="btn" id="share-btn" style="font-size:16px;">回報戰績並分享</button>
-                <br><br>
-                <a href="http://googleusercontent.com/maps.google.com/3" target="_blank" style="color:#8B4513; font-size:14px;">📍 開啟 Google Maps 導航</a>
-            </div>
-        `;
-        document.getElementById('share-btn').onclick = share;
+        popModal(`<div style="border: 2px dashed #8B4513; padding: 15px; background: #FFF9E3;"><h3 style="margin-top:0;">🎫 豐生茶館 入座憑證</h3><p>時間：3/8 (日) 12:00</p><p style="color: #e74c3c; font-size: 13px; font-weight: bold; background:#ffeaea; padding:8px; border-radius:10px; line-height:1.4;">吧拉拉：拜託一定要來，不然我的玻璃心會碎到明天不能上班...💔</p><p style="font-weight:bold;">💰 訂金：$100 / 人 (2/25 止)</p><button class="btn" onclick="share()">分享戰績並結束</button></div>`);
     }
 
     function share() {
-        if (!liff.isApiAvailable('shareTargetPicker')) return alert("請在 LINE 中開啟！");
-        liff.shareTargetPicker([{
-            "type": "text",
-            "text": `我已領取 3/8 豐生茶館入座證！我收集了 ${foodCollected.size} 種美食，我會保護主辦方的玻璃心，在 2/25 前交好訂金！💔💪`
-        }]).then(() => liff.closeWindow());
+        const msgText = `我已領取 3/8 豐生茶館入座證！我收集了 ${foodCollected.size} 種美食，我會保護主辦方的玻璃心！💔💪`;
+        if (liff.isApiAvailable('shareTargetPicker')) {
+            liff.shareTargetPicker([{"type": "text", "text": msgText}]).then(() => liff.closeWindow());
+        } else {
+            alert("請在 LINE 中開啟以分享戰績！");
+        }
     }
 </script>
 </body>

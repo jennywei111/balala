@@ -7,42 +7,48 @@
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         :root { --main-color: #8B4513; --bg-color: #FDF5E6; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
         #game-container { width: 100%; max-width: 400px; padding: 20px; text-align: center; box-sizing: border-box; }
-        .board { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 5px; margin: 20px 0; background: #ddd; padding: 5px; border-radius: 10px; position: relative; }
-        .cell { aspect-ratio: 1; background: white; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 20px; position: relative; }
-        .center { grid-column: 2 / 4; grid-row: 2 / 4; background: #FFDAB9; font-weight: bold; font-size: 14px; display: flex; flex-direction: column; justify-content: center; border-radius: 5px; }
-        #player { width: 35px; height: 35px; border-radius: 50%; position: absolute; transition: all 0.3s ease; z-index: 10; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); left: 0; top: 0; }
-        .btn { background: #E67E22; color: white; border: none; padding: 12px 25px; border-radius: 25px; font-size: 18px; cursor: pointer; box-shadow: 0 4px #D35400; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px #D35400; }
-        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; }
-        .modal { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
-        .ticket { border: 2px dashed #8B4513; padding: 15px; background: #FFF9E3; }
-        .glass-heart { color: #e74c3c; font-size: 14px; font-weight: bold; margin: 15px 0; line-height: 1.5; }
+        .board { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; margin: 20px 0; background: #D2B48C; padding: 10px; border-radius: 15px; position: relative; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .cell { aspect-ratio: 1; background: #FFF; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; position: relative; border-bottom: 4px solid #ccc; }
+        .cell.event { background: #FFECB3; font-weight: bold; }
+        .center { grid-column: 2 / 4; grid-row: 2 / 4; background: #FFDAB9; font-weight: bold; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 10px; border: 2px solid #E67E22; }
+        #player { width: 40px; height: 40px; border-radius: 50%; position: absolute; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.3); object-fit: cover; left: 0; top: 0; }
+        .btn { background: #E67E22; color: white; border: none; padding: 15px 35px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #D35400; transition: 0.1s; }
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px #D35400; }
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .modal { background: white; padding: 30px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .ticket { border: 3px dashed #8B4513; padding: 20px; background: #FFF9E3; border-radius: 10px; }
+        .glass-heart { color: #e74c3c; font-size: 15px; font-weight: bold; margin: 15px 0; line-height: 1.6; background: #ffeaea; padding: 10px; border-radius: 10px; }
         .hidden { display: none !important; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h2>🍵 豐生茶館挑戰</h2>
-    <div id="stat">美食: <span id="food-count">0</span> / 4 | 圈數: <span id="lap-count">1</span> / 5</div>
+    <h2 style="color: #8B4513; margin-bottom: 5px;">🍱 吃貨大富翁</h2>
+    <div id="stat" style="margin-bottom: 10px;">
+        <span style="background: #fff; padding: 5px 10px; border-radius: 15px; border: 1px solid #ddd;">🍱 <span id="food-count">0</span> / 4</span>
+        <span style="background: #fff; padding: 5px 10px; border-radius: 15px; border: 1px solid #ddd;">🚩 第 <span id="lap-count">1</span> 圈</span>
+    </div>
     
     <div class="board" id="board">
         <img id="player" src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="player">
-        <div class="center">豐生茶館<br>3/8 12:00</div>
+        <div class="center">豐生茶館<br><span style="font-size: 10px;">3/8 12:00</span></div>
     </div>
 
     <button class="btn" id="dice-btn">🎲 擲骰子</button>
-    <div id="msg" style="margin-top:15px; min-height: 1.5em; color: #8B4513; font-weight: bold;">吧拉拉：加油喔！</div>
+    <div id="msg" style="margin-top:20px; height: 3em; color: #8B4513; font-weight: bold; font-size: 15px; padding: 0 10px;">吧拉拉：快擲骰子開始冒險吧！</div>
 </div>
 
 <div id="overlay">
     <div class="modal" id="modal-content">
-        <h3>📢 特遣任務報告</h3>
-        <p>吧拉拉導播：3/8 聚餐位子訂好了！請集齊 4 個美食或繞完 5 圈完成報名。</p>
-        <p style="color:red; font-weight:bold;">⚠️ 每人需交 $100 訂金，主辦方玻璃心害怕被放鴿子...</p>
-        <button class="btn" id="start-btn">了解，開始收集！</button>
+        <h3 style="color: #E67E22;">📣 吧拉拉導播公告</h3>
+        <p>3/8 12:00 豐生茶館聚餐任務！<br>請在 5 圈內集齊 4 樣必吃美食才算報名成功喔！</p>
+        <p style="color:red; font-weight:bold;">⚠️ 需繳納 $100 訂金</p>
+        <button class="btn" id="start-btn">了解，開玩！</button>
     </div>
 </div>
 
@@ -52,95 +58,127 @@
     let foodCollected = new Set();
     let laps = 1;
     const boardSize = 12;
-    const foodCells = { 2: "🍱", 5: "🧋", 8: "🥟", 11: "🍗" };
+    
+    // 定義格子內容
+    const boardConfig = [
+        { icon: "🏠", name: "起點" }, { icon: "❓", name: "命運", type: "event" }, { icon: "🍱", name: "飽到天靈蓋豪華便當" },
+        { icon: "❓", name: "機會", type: "event" }, { icon: "🏃", name: "快走" }, { icon: "🧋", name: "主辦方淚水珍奶" },
+        { icon: "🚧", name: "塞車", type: "event" }, { icon: "❓", name: "命運", type: "event" }, { icon: "🥟", name: "皮薄心軟噴汁餃" },
+        { icon: "🧧", name: "機會", type: "event" }, { icon: "🏃", name: "衝刺" }, { icon: "🍗", name: "主辦方碎碎念炸雞" }
+    ];
 
-    // 初始化網頁
     window.onload = function() {
-        // 生成格子
         const boardNode = document.getElementById('board');
-        for(let i=0; i<12; i++) {
+        boardConfig.forEach((config, i) => {
             let div = document.createElement('div');
-            div.className = 'cell';
+            div.className = config.type === "event" ? 'cell event' : 'cell';
             div.id = 'cell-' + i;
-            div.innerText = foodCells[i] || "⚪";
+            div.innerHTML = `<span style="font-size:20px">${config.icon}</span><span style="font-size:10px">${config.name}</span>`;
             boardNode.appendChild(div);
-        }
+        });
         
-        // 綁定按鈕
-        document.getElementById('start-btn').onclick = function() {
-            document.getElementById('overlay').classList.add('hidden');
-        };
-
+        document.getElementById('start-btn').onclick = () => document.getElementById('overlay').classList.add('hidden');
         document.getElementById('dice-btn').onclick = rollDice;
 
-        // 初始化 LIFF
         liff.init({ liffId }).then(() => {
-            if (!liff.isLoggedIn()) { liff.login(); }
-            liff.getProfile().then(p => { 
-                document.getElementById('player').src = p.pictureUrl; 
-            });
+            if (!liff.isLoggedIn()) liff.login();
+            liff.getProfile().then(p => { document.getElementById('player').src = p.pictureUrl; });
         });
-
         setTimeout(updatePlayerPos, 500);
     };
 
     function updatePlayerPos() {
         const cell = document.getElementById('cell-' + currentPos);
         const player = document.getElementById('player');
-        player.style.left = cell.offsetLeft + (cell.offsetWidth/2 - 17.5) + 'px';
-        player.style.top = cell.offsetTop + (cell.offsetHeight/2 - 17.5) + 'px';
+        player.style.left = cell.offsetLeft + (cell.offsetWidth/2 - 20) + 'px';
+        player.style.top = cell.offsetTop + (cell.offsetHeight/2 - 20) + 'px';
     }
 
     function rollDice() {
         if (navigator.vibrate) navigator.vibrate(50);
-        let step = Math.floor(Math.random() * 6) + 1;
-        document.getElementById('msg').innerText = `擲出了 ${step} 點！`;
-        
+        const dice = Math.floor(Math.random() * 6) + 1;
+        document.getElementById('msg').innerText = `🎲 你擲出了 ${dice} 點！`;
+        movePlayer(dice);
+    }
+
+    function movePlayer(step) {
         let target = currentPos + step;
         if (target >= boardSize) {
             laps++;
             document.getElementById('lap-count').innerText = laps;
+            say("吧拉拉：哇！又繞一圈了，離美食更近了！");
         }
         currentPos = target % boardSize;
         updatePlayerPos();
 
-        if (foodCells[currentPos]) {
-            foodCollected.add(foodCells[currentPos]);
-            document.getElementById('food-count').innerText = foodCollected.size;
-        }
+        setTimeout(() => {
+            const cell = boardConfig[currentPos];
+            if (["🍱", "🧋", "🥟", "🍗"].includes(cell.icon)) {
+                if (!foodCollected.has(cell.icon)) {
+                    foodCollected.add(cell.icon);
+                    document.getElementById('food-count').innerText = foodCollected.size;
+                    say(`吧拉拉：太棒了！獲得了 ${cell.icon}！`);
+                } else {
+                    say(`吧拉拉：這道 ${cell.icon} 你已經拿過囉～`);
+                }
+            } else if (cell.type === "event") {
+                triggerEvent();
+            }
 
-        if (foodCollected.size >= 4 || laps > 5) {
-            setTimeout(showResult, 600);
+            if (foodCollected.size >= 4 || laps > 5) {
+                setTimeout(showResult, 1000);
+            }
+        }, 500);
+    }
+
+    function triggerEvent() {
+        const events = [
+            { m: "吧拉拉應援！前進 1 格", s: 1 },
+            { m: "梅川東路大塞車！退後 1 格", s: -1 },
+            { m: "手機大地震！(畫面劇烈抖動)", s: 0, v: true },
+            { m: "吧拉拉碎碎念：記得 2/25 前交訂金喔！", s: 0 }
+        ];
+        const e = events[Math.floor(Math.random() * events.length)];
+        say(e.m);
+        if (e.v) {
+            document.body.classList.add('shake');
+            if (navigator.vibrate) navigator.vibrate(400);
+            setTimeout(() => document.body.classList.remove('shake'), 500);
+        }
+        if (e.s !== 0) {
+            setTimeout(() => {
+                currentPos = (currentPos + e.s + boardSize) % boardSize;
+                updatePlayerPos();
+            }, 800);
         }
     }
+
+    function say(txt) { document.getElementById('msg').innerText = txt; }
 
     function showResult() {
         document.getElementById('overlay').classList.remove('hidden');
         document.getElementById('modal-content').innerHTML = `
             <div class="ticket">
-                <h3>🎫 豐生茶館 入座證</h3>
+                <h3 style="margin-top:0;">🎫 豐生茶館 入座憑證</h3>
                 <p>時間：3/8 (日) 12:00</p>
                 <div class="glass-heart">
-                    吧拉拉：為了防止有人放鴿子，請依人數繳納訂金。不然主辦方會玻璃心碎掉，碎到明天都不能上班了...💔
+                    為了防止有人放鴿子，請依人數繳納訂金。不然主辦方會玻璃心碎掉，明天都不能上班了...💔
                 </div>
-                <p>💰 訂金：$100 / 人 (2/25 止)</p>
-                <button class="btn" id="share-btn">回報戰績並分享</button>
+                <p style="font-weight:bold; color:#D35400;">💰 訂金：$100 / 人<br><span style="font-size:12px">(2/25 截止，現場可抵消費)</span></p>
+                <button class="btn" id="share-btn" style="font-size:16px;">回報戰績並分享</button>
                 <br><br>
-                <button style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;" onclick="window.open('https://www.google.com/maps/search/?api=1&query=豐生茶館')">📍 開啟導航</button>
+                <a href="http://googleusercontent.com/maps.google.com/3" target="_blank" style="color:#8B4513; font-size:14px;">📍 開啟 Google Maps 導航</a>
             </div>
         `;
         document.getElementById('share-btn').onclick = share;
     }
 
     function share() {
-        if (liff.isApiAvailable('shareTargetPicker')) {
-            liff.shareTargetPicker([{
-                "type": "text",
-                "text": "我已領取 3/8 豐生茶館入座證！我會保護主辦方的玻璃心，在 2/25 前交好訂金！💔💪"
-            }]).then(() => liff.closeWindow());
-        } else {
-            alert("請在 LINE App 中開啟以分享訊息！");
-        }
+        if (!liff.isApiAvailable('shareTargetPicker')) return alert("請在 LINE 中開啟！");
+        liff.shareTargetPicker([{
+            "type": "text",
+            "text": `我已領取 3/8 豐生茶館入座證！我收集了 ${foodCollected.size} 種美食，我會保護主辦方的玻璃心，在 2/25 前交好訂金！💔💪`
+        }]).then(() => liff.closeWindow());
     }
 </script>
 </body>

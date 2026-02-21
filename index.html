@@ -3,38 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>豐生茶館：吃貨報名挑戰</title>
+    <title>豐生茶館：跑步進場邀請函</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        :root { --main-color: #8B4513; --bg-color: #FDF5E6; --accent: #E67E22; }
+        :root { --main-color: #8B4513; --bg-color: #FDF5E6; --accent: #E67E22; --card-bg: #FFF9E3; }
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow: hidden; touch-action: manipulation; }
         
         #game-container { width: 100%; max-width: 400px; padding: 15px; text-align: center; box-sizing: border-box; }
         
-        /* 收集區域：點亮效果 */
-        #collection-zone { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 10px; background: #fff; padding: 12px; border-radius: 20px; border: 2px solid #D2B48C; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        /* 吧拉拉公告卡片樣式 */
+        .announcement-card { background: white; border: 3px solid var(--accent); border-radius: 15px; padding: 15px; margin-bottom: 15px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .announcement-header { background: var(--accent); color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold; display: inline-block; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+        .announcement-content { margin-top: 5px; font-size: 14px; color: #5D4037; line-height: 1.5; }
+        .announcement-footer { font-size: 12px; color: #E74C3C; font-weight: bold; margin-top: 5px; border-top: 1px dashed #D2B48C; padding-top: 5px; }
+
+        /* 收集區域 */
+        #collection-zone { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 10px; background: #fff; padding: 10px; border-radius: 20px; border: 2px solid #D2B48C; }
         .food-slot { font-size: 26px; filter: grayscale(100%); opacity: 0.2; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .food-slot.active { filter: grayscale(0%); opacity: 1; transform: scale(1.3) rotate(10deg); }
 
         /* 棋盤格 */
-        .board { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; margin: 15px 0; background: #D2B48C; padding: 10px; border-radius: 18px; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .cell { aspect-ratio: 1; background: #FFF; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; position: relative; border-bottom: 4px solid #ddd; transition: background 0.3s; }
+        .board { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 8px; margin: 15px 0; background: #D2B48C; padding: 10px; border-radius: 18px; position: relative; }
+        .cell { aspect-ratio: 1; background: #FFF; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; position: relative; border-bottom: 4px solid #ddd; }
         .cell.event { background: #FFF9C4; color: #D35400; font-weight: bold; }
         
-        .center { grid-column: 2 / 4; grid-row: 2 / 4; background: #FFDAB9; font-weight: bold; font-size: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 15px; border: 2px dashed #E67E22; color: #8B4513; }
+        .center { grid-column: 2 / 4; grid-row: 2 / 4; background: #FFDAB9; font-weight: bold; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 15px; border: 2px dashed #E67E22; color: #8B4513; }
         
-        /* 頭像 */
         #player { width: 42px; height: 42px; border-radius: 50%; position: absolute; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 10; border: 3px solid white; box-shadow: 0 6px 12px rgba(0,0,0,0.3); object-fit: cover; }
         
-        /* 按鈕與彈窗 */
-        .btn { background: var(--accent); color: white; border: none; padding: 14px 0; border-radius: 35px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #D35400; width: 85%; transition: 0.1s; }
-        .btn:active { transform: translateY(3px); box-shadow: 0 2px #D35400; }
+        .btn { background: var(--accent); color: white; border: none; padding: 14px 0; border-radius: 35px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 5px #D35400; width: 85%; }
         .btn:disabled { background: #BDC3C7; box-shadow: none; cursor: not-allowed; }
         
         #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
-        .modal { background: white; padding: 30px 20px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; border: 5px solid var(--accent); position: relative; animation: modalIn 0.3s ease-out; }
-        @keyframes modalIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
+        .modal { background: white; padding: 30px 20px; border-radius: 25px; width: 85%; max-width: 320px; text-align: center; border: 5px solid var(--accent); position: relative; }
+        .hidden { display: none !important; }
         .shake { animation: shakeEffect 0.5s; }
         @keyframes shakeEffect { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-10px); } 80% { transform: translateX(10px); } }
     </style>
@@ -42,7 +44,15 @@
 <body>
 
 <div id="game-container">
-    <h2 style="color: #8B4513; margin-bottom: 15px;">🍱 吃貨大富翁</h2>
+    <div class="announcement-card">
+        <div class="announcement-header">📢 吧拉拉導播公告</div>
+        <div class="announcement-content">
+            <b>豐生茶館吃貨任務</b><br>
+            收集 4 樣美食或繞完 5 圈即可獲得入座證！<br>
+            📅 3/8 (日) 12:00 跑步進場
+        </div>
+        <div class="announcement-footer">⚠️ 需交 $100 訂金方可報名成功</div>
+    </div>
     
     <div id="collection-zone">
         <div id="slot-🍱" class="food-slot">🍱</div>
@@ -54,14 +64,14 @@
     
     <div class="board" id="board">
         <img id="player" src="https://cdn-icons-png.flaticon.com/512/147/147144.png" alt="player">
-        <div class="center">豐生茶館<br><span style="font-size: 11px;">3/8 12:00</span></div>
+        <div class="center">豐生茶館<br><span style="font-size: 11px;">跑步進場</span></div>
     </div>
 
     <button class="btn" id="dice-btn">🎲 擲骰子出發</button>
-    <div id="msg" style="margin-top:20px; color: #8B4513; font-weight: bold; font-size: 16px;">吧拉拉：快開始吧！</div>
+    <div id="msg" style="margin-top:15px; color: #8B4513; font-weight: bold;">吧拉拉：看誰先收集完！</div>
 </div>
 
-<div id="overlay">
+<div id="overlay" class="hidden">
     <div class="modal" id="modal-content"></div>
 </div>
 
@@ -69,20 +79,19 @@
     const liffId = "2009192757-ZZX0pw1b";
     let currentPos = 0, foodCollected = new Set(), laps = 1, isMoving = false, boardSize = 12;
     
-    // 依據你的要求修改的美食名稱與事件
     const boardConfig = [
-        { icon: "🏠", name: "起點", msg: "回到起點！吧拉拉：能量補滿，準備再衝一圈！" }, 
+        { icon: "🏠", name: "起點", msg: "回到起點！吧拉拉：體力補滿！" }, 
         { icon: "❓", name: "命運", type: "event" }, 
-        { icon: "🍱", name: "飽到天靈蓋<br>豪華便當", msg: "吧拉拉：這份量...主辦方是想把大家都餵成胖子吧！🍱" },
+        { icon: "🍱", name: "飽到天靈蓋<br>豪華便當", msg: "吧拉拉：這便當份量太狂了吧！🍱" },
         { icon: "❓", name: "機會", type: "event" }, 
-        { icon: "🏃", name: "快步", msg: "吧拉拉：別跑那麼快，我的短腿快跟不上啦！" }, 
-        { icon: "🧋", name: "主辦方<br>淚水珍奶", msg: "吧拉拉：這珍珠大顆又圓潤，跟主辦方的眼淚一模一樣。💔" },
+        { icon: "🏃", name: "快步", msg: "吧拉拉：跑快點，美食不等人！" }, 
+        { icon: "🧋", name: "主辦方<br>淚水珍奶", msg: "吧拉拉：這珍珠裡有主辦方感動的淚水。💔" },
         { icon: "🚧", name: "塞車", type: "event" }, 
         { icon: "❓", name: "命運", type: "event" }, 
-        { icon: "🥟", name: "皮薄心軟<br>噴汁餃", msg: "吧拉拉：小心噴汁！這餃子跟主辦方的心一樣軟。💸" },
+        { icon: "🥟", name: "皮薄心軟<br>噴汁餃", msg: "吧拉拉：小心噴汁！這口感絕了。💸" },
         { icon: "🧧", name: "機會", type: "event" }, 
-        { icon: "🏃", name: "衝刺", msg: "吧拉拉：衝啊！為了 3/8 的豪華大餐，這點路不算什麼！" }, 
-        { icon: "🍗", name: "主辦方<br>碎碎念炸雞", msg: "吧拉拉：每一口炸雞都帶著主辦方的提醒：記得交訂金！🍗" }
+        { icon: "🏃", name: "衝刺", msg: "吧拉拉：為了大餐，衝刺吧！" }, 
+        { icon: "🍗", name: "主辦方<br>碎碎念炸雞", msg: "吧拉拉：聽著主辦方的碎碎念，炸雞更香了。🍗" }
     ];
 
     window.onload = function() {
@@ -99,7 +108,6 @@
             if (!liff.isLoggedIn()) liff.login();
             liff.getProfile().then(p => { document.getElementById('player').src = p.pictureUrl; });
         });
-        popModal(`<h3>📢 吧拉拉導播公告</h3><p>3/8 12:00 豐生茶館聚餐任務！<br>集齊 4 樣美食或繞完 5 圈才算報名成功！</p><p style="color:red; font-weight:bold;">⚠️ 每人需交 $100 訂金</p><button class="btn" onclick="closeModal()">了解，開玩！</button>`);
         setTimeout(updatePlayerPos, 500);
     };
 
@@ -150,16 +158,10 @@
         const events = [
             { t: "吧拉拉助陣！", m: "吧拉拉在背後推了你一把，前進 1 格！", s: 1 },
             { t: "路邊滑倒！", m: "地板太油了，狼狽地向後退 1 格...", s: -1 },
-            { t: "驚喜地震！", m: "吧拉拉：大家坐穩了，手機要大地震啦！", s: 0, v: true },
             { t: "吧拉拉推拿時間", m: "你走得太辛苦了，強制休息 5 秒放鬆一下...", s: 0, wait: 5 },
-            { t: "碎碎念攻擊！", m: "吧拉拉：記得 2/25 前要交訂金喔，不交我就去你家門口哭！💔", s: 0 }
+            { t: "碎碎念攻擊！", m: "吧拉拉：記得交訂金喔，不交我就去你家門口哭！💔", s: 0 }
         ];
         const e = events[Math.floor(Math.random() * events.length)];
-        if (e.v) {
-            document.body.classList.add('shake');
-            if (navigator.vibrate) navigator.vibrate(400);
-            setTimeout(() => document.body.classList.remove('shake'), 500);
-        }
         if (e.wait) { startWait(e.t, e.m, e.wait); } 
         else { popModal(`<h3>${e.t}</h3><p>${e.m}</p><button class="btn" onclick="executeEvent(${e.s})">收到</button>`); }
     }
@@ -169,9 +171,9 @@
         isMoving = true;
         document.getElementById('dice-btn').disabled = true;
         const updateWaitModal = () => {
-            popModal(`<h3>${title}</h3><p>${msg}</p><h2 id="timer" style="color:#E67E22; font-size:45px; margin:15px 0;">${timeLeft}</h2><p>吧拉拉：不准動喔！倒數結束才能走！</p>`);
+            popModal(`<h3>${title}</h3><p>${msg}</p><h2 id="timer" style="color:#E67E22; font-size:45px; margin:15px 0;">${timeLeft}</h2><p>倒數結束才能走！</p>`);
             if (timeLeft > 0) { timeLeft--; setTimeout(updateWaitModal, 1000); } 
-            else { popModal(`<h3>休息結束！</h3><p>吧拉拉：推拿完舒服多了吧？繼續前進！</p><button class="btn" onclick="isMoving=false; document.getElementById('dice-btn').disabled=false; checkEnd();">出發！</button>`); }
+            else { popModal(`<h3>休息結束！</h3><p>吧拉拉：繼續前進！</p><button class="btn" onclick="isMoving=false; document.getElementById('dice-btn').disabled=false; checkEnd();">出發！</button>`); }
         };
         updateWaitModal();
     }
@@ -192,14 +194,12 @@
     }
 
     function showResult() {
-        popModal(`<div style="border: 2px dashed #8B4513; padding: 15px; background: #FFF9E3;"><h3 style="margin-top:0;">🎫 豐生茶館 入座憑證</h3><p>時間：3/8 (日) 12:00</p><p style="color: #e74c3c; font-size: 13px; font-weight: bold; background:#ffeaea; padding:8px; border-radius:10px; line-height:1.4;">吧拉拉：拜託一定要來，不然我的玻璃心會碎到明天不能上班...💔</p><p style="font-weight:bold; margin-top:10px;">💰 訂金：$100 / 人 (2/25 止)</p><button class="btn" onclick="share()" style="margin-top:10px;">分享戰績並結束</button></div>`);
+        popModal(`<div style="border: 2px dashed #8B4513; padding: 15px; background: #FFF9E3;"><h3>🎫 豐生茶館 入座憑證</h3><p>時間：3/8 (日) 12:00</p><p style="color: #e74c3c; font-size: 13px; font-weight: bold;">吧拉拉：拜託一定要來，不然我的玻璃心會碎...💔</p><button class="btn" onclick="share()" style="margin-top:10px;">分享戰績並結束</button></div>`);
     }
 
     function share() {
-        const msgText = `我已領取 3/8 豐生茶館入座證！我收集了 ${foodCollected.size} 種美食，我會保護主辦方的玻璃心！💔💪`;
-        if (liff.isApiAvailable('shareTargetPicker')) {
-            liff.shareTargetPicker([{"type": "text", "text": msgText}]).then(() => liff.closeWindow());
-        } else { alert("請在 LINE 中開啟以分享戰績！"); }
+        const msgText = `我已領取 3/8 豐生茶館入座證！我收集了 ${foodCollected.size} 種美食！💔💪`;
+        liff.shareTargetPicker([{"type": "text", "text": msgText}]).then(() => liff.closeWindow());
     }
 </script>
 </body>

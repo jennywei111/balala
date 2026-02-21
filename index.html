@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>展弘自費春酒 - 豐生茶館</title>
+    <title>展弘自費春酒 - 吧拉拉監製</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -38,21 +38,20 @@
         
         .btn { width: 100%; background: var(--accent); color: white; border: none; padding: 16px 0; border-radius: 20px; font-size: 18px; font-weight: 900; box-shadow: 0 6px 0 var(--shadow); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--shadow); }
-        .btn-outline { background: white; color: var(--text); border: 2px solid var(--text); box-shadow: 0 4px 0 var(--text); font-size: 14px; padding: 10px 0; margin-top: 10px; }
+        .btn:disabled { background: #CCC; box-shadow: 0 4px 0 #999; cursor: not-allowed; }
 
         /* 彈窗 */
         #overlay { position: fixed; inset: 0; background: rgba(74, 44, 42, 0.9); backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .modal { background: white; border-radius: 32px; width: 100%; max-width: 350px; padding: 30px 24px; text-align: center; border: 4px solid var(--text); box-sizing: border-box; }
         .hidden { display: none !important; }
-        .announcement-text { text-align: left; font-size: 14px; line-height: 1.6; background: #F3F4F6; padding: 15px; border-radius: 16px; margin: 15px 0; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <div style="text-align: center; margin-top: 10px;">
-        <h1 style="margin: 0; font-size: 24px;">豐生茶館大富翁</h1>
-        <p style="font-size: 12px; opacity: 0.6;">🚩 當前圈數：<span id="lap-val">1</span> / 5</p>
+    <div style="text-align: center;">
+        <h1 style="margin: 0; font-size: 22px;">神秘邀請函</h1>
+        <p style="font-size: 12px; opacity: 0.7;">🚩 圈數：<span id="lap-val">1</span> / 5</p>
     </div>
 
     <div class="collection">
@@ -72,41 +71,43 @@
 
 <div id="overlay">
     <div class="modal" id="modal-content">
-        <div class="tag" style="background: var(--accent); color: white; padding: 4px 12px; border-radius: 8px; display: inline-block; font-weight: 900; margin-bottom: 10px;">📢 吧拉拉公告</div>
+        <div style="background: var(--accent); color: white; padding: 4px 12px; border-radius: 8px; display: inline-block; font-weight: 900; margin-bottom: 10px;">📢 吧拉拉公告</div>
         <h2 style="margin: 5px 0;">豐生茶館邀請函</h2>
-        <div class="announcement-text">
-            由於主辦方玻璃心需要陪伴，極度害怕放鴿子事件，所以餐廳需要收 <b>100元/1人</b> 訂金 (可抵消費)。<br><br>
-            📅 繳交截止日：<b>2/25</b><br>
-            💸 支持多元付款<br><br>
-            <small>※ 收集 4 種美食或繞行 5 圈即可領取證書！</small>
+        <div style="text-align: left; font-size: 14px; background: #F3F4F6; padding: 15px; border-radius: 16px; margin: 15px 0;">
+            吧拉拉：主辦方玻璃心極易碎掉，可能一個月都不能上班，為了防止放鴿子事件，餐廳需要收 <b>100元/1人</b> 訂金(可抵消費)。<br><br>
+            📅 截止日：<b>2/25</b><br>
+            ✨ 支持多元付款!
+            ✨ 通關：收集 4 樣美食 或 跑滿 5 圈！
         </div>
-        <button class="btn" onclick="closeModal()">進入大富翁</button>
+        <button class="btn" onclick="closeModal()">開始遊戲</button>
     </div>
 </div>
 
 <script>
     const LIFF_ID = "2009192757-ZZX0pw1b";
     
+    // 格子配置
     const BOARD_CONFIG = [
-        { r:1, c:1, icon: "🏠", name: "起點", msg: "回到起點！吧拉拉：精力充沛！" },
+        { r:1, c:1, icon: "🏠", name: "起點", msg: "回到起點！吧拉拉：恭喜你還活著！" },
         { r:1, c:2, icon: "❓", name: "命運", type: "event" },
-        { r:1, c:3, icon: "🍱", name: "飽到天靈蓋<br>豪華便當", msg: "吧拉拉：這便當份量太狂了吧，我可以再上一週的班！🍱" },
+        { r:1, c:3, icon: "🍱", name: "飽到天靈蓋<br>豪華便當", msg: "這份量...吧拉拉看了都想加班！🍱" },
         { r:1, c:4, icon: "❓", name: "機會", type: "event" },
-        { r:2, c:4, icon: "🏃", name: "快步", msg: "吧拉拉：跑快點，美食不等人！" },
-        { r:3, c:4, icon: "🧋", name: "主辦方<br>淚水珍奶", msg: "吧拉拉：這珍珠裡有主辦方感動的淚水。💔" },
+        { r:2, c:4, icon: "🚀", name: "吧拉拉<br>背後推手", msg: "導播偷偷推了你一下，飛出去了！" },
+        { r:3, c:4, icon: "🧋", name: "主辦方<br>淚水珍奶", msg: "這珍珠是用主辦方感動的淚水搓的。💔" },
         { r:4, c:4, icon: "🚧", name: "塞車", type: "event" },
         { r:4, c:3, icon: "❓", name: "命運", type: "event" },
         { r:4, c:2, icon: "🥟", name: "皮薄心軟<br>噴汁餃", msg: "吧拉拉：小心噴汁！這口感絕了。💸" },
         { r:4, c:1, icon: "🧧", name: "機會", type: "event" },
-        { r:3, c:1, icon: "🏃", name: "衝刺", msg: "吧拉拉：為了大餐，衝刺吧！" },
-        { r:2, c:1, icon: "🍗", name: "主辦方<br>碎碎念炸雞", msg: "吧拉拉：阿彌陀佛!記得!不要忘記我們的約定。🍗" }
+        { r:3, c:1, icon: "🌪️", name: "餓到<br>起龍捲風", msg: "因為太餓，你突然爆發出驚人速度！" },
+        { r:2, c:1, icon: "🍗", name: "主辦方<br>碎碎念炸雞", msg: "阿彌陀佛!記得我們的約定。🍗" }
     ];
 
+    // 事件配置
     const EVENTS = [
-        { t: "吧拉拉助陣", m: "導播怕你累推你一下，前進 1 格！", s: 1 },
-        { t: "路邊滑倒", m: "哎呀！是誰磨粉撒一地!地板太滑了，退後 3 格...", s: -3 },
-        { t: "吧拉拉推拿", m: "走得太累了？原地休息一下吧！", s: 0 },
-        { t: "碎碎念攻擊", m: "吧拉拉：記得交訂金喔，不交我就去你家門口哭！💔", s: 0 }
+        { t: "吧拉拉助陣", m: "導播幫你開外掛，前進 2 格！", s: 2 },
+        { t: "路邊滑倒", m: "地板太油了，你滑到了後方 2 格...", s: -2 },
+        { t: "吧拉拉推拿", m: "看你走得太累，強制按摩 5 秒放鬆！💆", s: 0, wait: 5 },
+        { t: "碎碎念重擊", m: "主辦方：2/25 記得交訂金喔～不交我就哭！", s: 0 }
     ];
 
     let currentIdx = 0, foodCollected = new Set(), laps = 1, isMoving = false;
@@ -157,20 +158,40 @@
         
         if (tile.type === 'event') {
             const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)];
-            popModal(`<h2>✨ ${ev.t}</h2><p>${ev.m}</p><button class="btn" onclick="closeModal()">確認</button>`);
-            if (ev.s !== 0) {
-                await new Promise(r => setTimeout(r, 1500));
-                currentIdx = (currentIdx + ev.s + BOARD_CONFIG.length) % BOARD_CONFIG.length;
-                updateAvatar();
+            
+            if (ev.wait) {
+                // 強制休息 5 秒邏輯
+                popModal(`<h2>✨ ${ev.t}</h2><p>${ev.m}</p><button id="wait-btn" class="btn" disabled>按摩中... (5s)</button>`);
+                let timeLeft = ev.wait;
+                const timer = setInterval(() => {
+                    timeLeft--;
+                    const btn = document.getElementById('wait-btn');
+                    if (btn) btn.innerText = `按摩中... (${timeLeft}s)`;
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerText = "按完了，爽！";
+                            btn.onclick = closeModal;
+                        }
+                    }
+                }, 1000);
+            } else {
+                popModal(`<h2>✨ ${ev.t}</h2><p>${ev.m}</p><button class="btn" onclick="closeModal()">確認</button>`);
+                if (ev.s !== 0) {
+                    await new Promise(r => setTimeout(r, 1200));
+                    currentIdx = (currentIdx + ev.s + BOARD_CONFIG.length) % BOARD_CONFIG.length;
+                    updateAvatar();
+                }
             }
             return;
         }
 
-        const foodIcons = ["🍱", "🧋", "🥟", "🍗"];
-        foodIcons.forEach(icon => {
-            if (tile.icon.includes(icon)) {
-                foodCollected.add(icon);
-                document.getElementById(`slot-${icon}`).classList.add('active');
+        const foods = ["🍱", "🧋", "🥟", "🍗"];
+        foods.forEach(f => {
+            if (tile.icon.includes(f)) {
+                foodCollected.add(f);
+                document.getElementById(`slot-${f}`).classList.add('active');
             }
         });
 
@@ -187,16 +208,12 @@
                 <h2 style="margin:0;">🎫 領證成功！</h2>
                 <p style="font-size:14px; font-weight:900; color:var(--accent);">傳說級美食大師</p>
             </div>
-            <div style="text-align:left; font-size:14px; margin-bottom:15px; line-height:1.8;">
-                📍 <b>地點：</b>豐生茶館 (梅川東店)<br>
+            <div style="text-align:left; font-size:14px; margin-bottom:15px;">
+                📍 <b>地點：</b>豐生茶館<br>
                 ⏰ <b>時間：</b>3/8 (日) 12:00<br>
                 💰 <b>訂金：</b>$100 / 人 (2/25 止)
             </div>
-            <p style="font-size:11px; color:#666; font-style:italic; background:#F3F4F6; padding:10px; border-radius:10px;">
-                吧拉拉：不交訂金我就去你家門口哭喔...💔
-            </p>
             <button class="btn" onclick="share()">分享約定</button>
-            <button class="btn btn-outline" onclick="window.open('https://maps.app.goo.gl/YourMapLink')">開啟導航</button>
         `);
     }
 
@@ -205,13 +222,8 @@
         document.getElementById('overlay').classList.remove('hidden'); 
     }
     
-    function closeModal() { 
-        document.getElementById('overlay').classList.add('hidden'); 
-    }
-    
-    function share() { 
-        liff.shareTargetPicker([{"type": "text", "text": "我拿到了豐生茶館入座證！婦女節見！"}]).then(() => liff.closeWindow()); 
-    }
+    function closeModal() { document.getElementById('overlay').classList.add('hidden'); }
+    function share() { liff.shareTargetPicker([{"type": "text", "text": "不要忘記我們的約定！3/8女神節見！"}]).then(() => liff.closeWindow()); }
 </script>
 </body>
 </html>
